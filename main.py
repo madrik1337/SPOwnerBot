@@ -40,14 +40,17 @@ async def start_command_handler(client: Client, message: types.Message) -> None:
 
 
 async def send_owner_message(message: types.Message, set_id: int) -> None:
-    user_id: int = set_id >> 32
-
     set_increment_id: Union[int, None] = None
 
-    if set_id >> 24 & 0xff:
-        user_id = user_id + 0x100000000
+    if (set_id & 0xFFFFFFFF) == 0xFF3FFFFF:
+        user_id: int = (set_id >> 32) + 0x180000000
     else:
-        set_increment_id = set_id & 0xffffffff
+        user_id: int = set_id >> 32
+
+        if set_id >> 24 & 0xff:
+            user_id = user_id + 0x100000000
+        else:
+            set_increment_id = set_id & 0xffffffff
 
     await message.reply_text(
         text = TEXTS["owner"].format(
